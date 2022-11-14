@@ -6,36 +6,41 @@ import {
   Text,
   TextInput,
   View,
+  ActivityIndicator
 } from "react-native";
 import React, { useState } from "react";
-
-type Goal = {
-  id: string;
-  value: string;
-};
+import { useCreateGoalMutation, useDeleteGoalMutation, useGetGoalsQuery } from "./api";
 
 const Goals = () => {
-  const [goals, setGoals] = useState<Goal[]>([]);
+
+  const { data: goals, isLoading, isError } = useGetGoalsQuery()
+  const [deleteGoal, { isLoading: isLoadingDelete, isError: isErrorDelete}] = useDeleteGoalMutation()
+  const [createGoal, { isLoading: isLoadingCreate, isError: isErrorCreate}] = useCreateGoalMutation()
 
   const [title, setTitle] = useState("");
 
-  const addGoalHandler = () => {
+  const addGoalHandler = async () => {
     if(title.length === 0) {
         return;
     }
-
-    setGoals((currentGoals) => [
-      ...currentGoals,
-      { id: Math.random().toString(), value: title },
-    ]);
+    await createGoal({ id: Math.random().toString(), value: title });
     setTitle("");
   };
 
   const removeGoalHandler = (goalId: string) => {
-    setGoals((currentGoals) => {
-      return currentGoals.filter((goal) => goal.id !== goalId);
-    });
+    deleteGoal(goalId);
   };
+
+
+  const isTotalLoading = isLoading || isLoadingDelete || isLoadingCreate
+  
+  if(isError || isErrorDelete || isErrorCreate) {
+    return <Text style={{
+      color: "red",
+      fontSize: 20,
+      fontWeight: "bold"
+    }}>Something went wrong</Text>
+  }
 
   return (
     <View style={styles.container}>
@@ -46,10 +51,14 @@ const Goals = () => {
         onChangeText={setTitle}
         value={title}
       />
-      <Button
-        title="Add Goal"
-        onPress={addGoalHandler}
-      />
+      {
+        isTotalLoading ? <ActivityIndicator size="large" color="#0000ff" /> : 
+(          <Button
+            title="Add Goal"
+            onPress={addGoalHandler}
+          />
+)}
+
       <FlatList
         style={styles.list}
         data={goals}
