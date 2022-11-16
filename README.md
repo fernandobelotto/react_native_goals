@@ -11,3 +11,7 @@ In the graphql-rtk branch you will find the code for the app using graphql and r
 - master
 - redux-toolkit
 - graphql-rtk
+
+## SonarQube
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=react-native-goals&metric=alert_status)](https://sonarcloud.io/dashboard?id=react-native-goals)
